@@ -17,40 +17,9 @@ It has two parts, because a program can't change the directory of the shell that
 
 You need `make` and `clang++` with C++17 support. On macOS, `xcode-select --install` provides both.
 
-**1. Build the binary**
+Run `../setup.sh` from this directory (or `./setup.sh` from the repo root). It builds the binary into `~/.local/bin`, and `~/.zshrc` sources `dev-tools.sh`, which puts `~/.local/bin` on `PATH` and sources `cdr.sh` straight from this repo, so you don't need to copy anything after editing it. In zsh, `cdr.sh` must be sourced after `compinit` for tab completion to register, and `setup.sh` takes care of this by adding its block at the end of `~/.zshrc`.
 
-```zsh
-mkdir -p ~/.local/bin
-make
-```
-
-Run `make` again after changing `src/cdr.cpp`.
-
-**2. Put `~/.local/bin` on your `PATH`**
-
-Skip this if `echo $PATH` already includes it. Otherwise, add this line to `~/.zshrc`:
-
-```zsh
-export PATH="$PATH:$HOME/.local/bin"
-```
-
-**3. Copy the shell script to your home directory**
-
-```zsh
-cp cdr.sh ~/cdr.sh
-```
-
-Copy it again after editing `cdr.sh` in this repo.
-
-**4. Source it from your shell config**
-
-Add this line to the bottom of `~/.zshrc` (or `~/.bashrc`). In zsh it must come after `compinit` (oh-my-zsh runs it for you), so tab completion registers:
-
-```zsh
-source ~/cdr.sh
-```
-
-**5. Reload your shell and check**
+Run `make` (or `setup.sh`) again after changing `cdr.cpp`. Then check it:
 
 ```zsh
 source ~/.zshrc
