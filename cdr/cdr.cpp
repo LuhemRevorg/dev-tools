@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 #include <system_error>
+#include <set>
+#include <vector>
 
 namespace fs = std::filesystem;
 std::string STORE = std::string(std::getenv("HOME")) + "/.cache/cdr/map";
@@ -15,17 +17,46 @@ static bool should_descend(const std::string& name) {
 }
 
 
+// Looks up (curr_root, target) in the cache. Along the way it drops lines that
+// are blank or malformed, duplicated, or point at a directory that no longer
+// exists, and rewrites the file if it dropped anything.
 std::string check_file(const std::string &curr_root, const std::string &target) {
-	
+
 	std::ifstream f(STORE);
-	
+
 	if (!f.is_open()) throw "Unable to open storage file";
 
-	std::string root, name, result;
+	std::vector<std::string> keep;
+	std::set<std::string> seen;
+	std::string line, hit;
+	bool dirty = false;
 
-	while (std::getline(f, root, '\t') && std::getline(f, name, '\t') && std::getline(f, result))
-		if (curr_root == root && target == name) return result;
-	
+	// Read whole lines and split them, so a blank or broken line can't run
+	// into the next entry (getline(f, x, '\t') reads straight past '\n').
+	while (std::getline(f, line)) {
+		const size_t a = line.find('\t');
+		const size_t b = (a == std::string::npos) ? a : line.find('\t', a + 1);
+		if (b == std::string::npos) { dirty = true; continue; }       // blank/malformed
+		if (!seen.insert(line).second) { dirty = true; continue; }    // duplicate
+
+		const std::string root = line.substr(0, a);
+		const std::string name = line.substr(a + 1, b - a - 1);
+		const std::string result = line.substr(b + 1);
+
+		std::error_code ec;
+		if (!fs::is_directory(result, ec)) { dirty = true; continue; } // stale
+
+		keep.push_back(line);
+		if (hit.empty() && root == curr_root && name == target) hit = result;
+	}
+	f.close();
+
+	if (dirty) {
+		std::ofstream out(STORE, std::ios::trunc);
+		for (const auto &l : keep) out << l << '\n';
+	}
+
+	if (!hit.empty()) return hit;
 	throw "No Match run bfs";
 }
 
