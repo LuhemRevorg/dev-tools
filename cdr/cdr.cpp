@@ -98,6 +98,7 @@ int main(int argc, char* argv[]) {
 	}
 	std::error_code ec;
 	const std::string target(argv[1]);
+	if (target == "..") {std::cout << ".." << std::endl; return 0;}
 	const fs::path root = fs::absolute(argc == 3 ? fs::path(argv[2]) : fs::path("."), ec).lexically_normal();
 	if (ec || !fs::is_directory(root, ec)) {
 		std::cerr << "cdr: not a directory: " << (argc == 3 ? argv[2] : ".") << "\n";
