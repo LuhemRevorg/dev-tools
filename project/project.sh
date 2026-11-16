@@ -2,10 +2,15 @@
 set -euo pipefail
 
 : "${PROJECTS_DIR:?PROJECTS_DIR environment variable is not set}"
+PRIVACY="--private"
+if [ $# -eq 2 ]; then
+  	PRIVACY="--public"
+fi
 
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <project-name>" >&2
-  exit 1
+if [ $# -ge 3 ]; then
+	
+	echo "Usage: $0 <project-name>" >&2
+	exit 1
 fi
 
 PROJECT_NAME="$1"
@@ -19,4 +24,4 @@ fi
 mkdir -p "$TARGET"
 cd "$TARGET"
 git init
-gh repo create "$PROJECT_NAME" --private --source=. --remote=origin
+gh repo create "$PROJECT_NAME" $PRIVACY --source=. --remote=origin
