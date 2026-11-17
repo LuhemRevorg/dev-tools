@@ -1,6 +1,10 @@
 # dev-tools
 
-My personal dev-tools, I could create a CLI...... idk too much of a hassle
+My personal dev-tools, I could create a CLI...... idk too much of a hassle.
+
+# Why?
+
+Cause Why not also helps me across internships :)
 
 ## Setup
 
